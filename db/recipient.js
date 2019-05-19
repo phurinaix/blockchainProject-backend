@@ -14,7 +14,9 @@ class Recipient {
         var index = this.recipients.findIndex(recipient => SHA256(recipient.identity).substring(10, 20) == nonce);
         if (index !== -1) {
             this.recipients[index].pubKey = `ecdsa-koblitz-pubkey:${pubKey}`;
+            return true;
         }
+        return false;
     }
     getRecipients() {
         return this.recipients;
