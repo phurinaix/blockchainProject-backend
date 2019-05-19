@@ -1,0 +1,2 @@
+bitcoinAddress = 16EzhjxfcdWbESkW5v2ZASiQ27HVABsnTY
+privateKey = KyaFejCxuQ347P2wSvmnoenZJDrYP9K7xNzK9qU6aqsLVPBiGy55

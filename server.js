@@ -4,7 +4,9 @@ const bodyParser = require("body-parser");
 const fs = require('fs');
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8000;
+const issuerProfile = require('./issuerProfile/issuerProfile.json');
+const revocationList = require('./issuerProfile/revocationList.json');
 const cert_default = require('./cert_data/cert_default.json');
 const issuer = new Issuer();
 const recipient = new Recipient();
@@ -22,9 +24,28 @@ app.use(bodyParser.urlencoded({
     extended: true 
 }));
 
-
 app.get('/', (req, res) => {
     res.send('Hello world');
+});
+
+app.post('/intro', (req, res) => {
+    var data = req.body;
+    fs.writeFile('./student/test.txt', JSON.stringify(data), err => {
+        if (err) throw err;
+        res.send(JSON.stringify(data));
+    })
+});
+
+app.get('/intro', (req, res) => {
+    res.sendFile(path.join(__dirname, './student/test.txt'));
+});
+
+app.get('/issuer-profile', (req, res) => {
+    res.send(JSON.stringify(issuerProfile));
+});
+
+app.get('/revocation-list', (req, res) => {
+    res.send(JSON.stringify(revocationList));
 });
 
 app.get('/issuer/information', (req, res) => {

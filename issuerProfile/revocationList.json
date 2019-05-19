@@ -1,0 +1,8 @@
+
+{
+    "@context": "https://w3id.org/openbadges/v2",
+    "id": "https://tu-issuer.herokuapp.com/revocation-list-testnet",
+    "type": "RevocationList",
+    "issuer": "https://tu-issuer.herokuapp.com/issuer-profile",
+    "revokedAssertions": []
+}
