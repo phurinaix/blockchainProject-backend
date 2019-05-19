@@ -24,15 +24,7 @@ app.use(bodyParser.urlencoded({
 
 
 app.get('/', (req, res) => {
-    res.render('index.hbs');
-});
-
-app.get('/create', (req, res) => {
-    res.render('create.hbs');
-});
-
-app.get('/diploma', (req, res) => {
-    res.render('diploma.hbs');
+    res.send('Hello world');
 });
 
 app.get('/issuer/information', (req, res) => {
