@@ -44,8 +44,8 @@ app.post('/intro', (req, res) => {
     // res.send('success');
     // if (data.nonce && data.bitcoinAddress) {
         // student.addData(JSON.stringify(data));
-        recipient.addPubKey(data.nonce, data.bitcoinAddress);
         res.send('success');
+        recipient.addPubKey(data.nonce, data.bitcoinAddress);
     // } else {
     //     res.send('error');
     // }
