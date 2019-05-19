@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
 const fs = require('fs');
+const SHA256 = require("crypto-js/sha256");
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
 const { Student } = require('./db/student.js');
@@ -26,8 +27,14 @@ app.use(bodyParser.urlencoded({
     extended: true 
 }));
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get('/', (req, res) => {
-    res.send('Hello world');
+    res.send('Thammasat University');
 });
 
 app.get('/intro', (req, res) => {
@@ -36,8 +43,13 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    student.addData(JSON.stringify(data));
-    res.send('success');
+    if (data.nonce && data.bitcoinAddress) {
+        student.addData(JSON.stringify(data));
+        recipient.addPubKey(data.nonce, data.bitcoinAddress);
+        res.send('success');
+    } else {
+        res.send('error');
+    }
 });
 
 app.get('/user', (req, res) => {
@@ -48,12 +60,7 @@ app.get('/issuer-profile', (req, res) => {
     res.send(JSON.stringify(issuerProfile));
 });
 
-// app.post('/issuer-profile', (req, res) => {
-//     var data = req.body;
-//     student.addData(JSON.stringify(data));
-//     res.send('success');
-// });
-
+//1DPnyQnNbaajjwT1mD363xNaEEwY8XTCTL
 app.get('/revocation-list', (req, res) => {
     res.send(JSON.stringify(revocationList));
 });
@@ -128,8 +135,25 @@ app.get('/recipients', (req, res) => {
 
 app.post('/recipient', (req, res) => {
     var data = req.body;
-    recipient.addRecipient(data.name, data.pubKey, data.identity);
-    res.send('success');
+    if (data.name && data.id) {
+        if (!(/^[A-Za-z]+$/.test(data.name))) {
+            return res.send('invalid_name');
+        }
+        if (!(/^\d+$/.test(data.id))) {
+            return res.send('invalid_id');
+        }
+        if (data.id.length !== 10) {
+            return res.send('id_length');
+        }
+        recipient.addRecipient(data.name, '', data.id);
+        var responseData = {
+            status: 'success',
+            oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+        }
+        res.send(JSON.stringify(responseData));
+    } else {
+        res.send('not_complete');
+    }
 });
 
 app.post('/diploma/recipient', (req, res) => {
