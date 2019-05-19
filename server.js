@@ -41,7 +41,7 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    return res.status(403).send('error');
+    return res.status(200).send('success');
     // res.send('success');
     // if (data.nonce && data.bitcoinAddress) {
         // student.addData(JSON.stringify(data));
