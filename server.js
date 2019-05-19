@@ -30,12 +30,14 @@ app.get('/', (req, res) => {
     res.send('Hello world');
 });
 
+app.get('/intro', (req, res) => {
+    res.send('Introduction');
+})
+
 app.post('/intro', (req, res) => {
     var data = req.body;
-    fs.writeFile('./student/test.txt', JSON.stringify(data), err => {
-        if (err) throw err;
-        res.send(JSON.stringify(data));
-    })
+    student.addData(JSON.stringify(data));
+    res.send('success');
 });
 
 app.get('/user', (req, res) => {
@@ -46,11 +48,11 @@ app.get('/issuer-profile', (req, res) => {
     res.send(JSON.stringify(issuerProfile));
 });
 
-app.post('/issuer-profile', (req, res) => {
-    var data = req.body;
-    student.addData(JSON.stringify(data));
-    res.send('success');
-});
+// app.post('/issuer-profile', (req, res) => {
+//     var data = req.body;
+//     student.addData(JSON.stringify(data));
+//     res.send('success');
+// });
 
 app.get('/revocation-list', (req, res) => {
     res.send(JSON.stringify(revocationList));
