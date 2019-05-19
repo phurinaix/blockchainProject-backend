@@ -36,12 +36,20 @@ app.post('/intro', (req, res) => {
     })
 });
 
-app.get('/intro', (req, res) => {
+app.get('/user', (req, res) => {
     res.sendFile(path.join(__dirname, './student/test.txt'));
 });
 
 app.get('/issuer-profile', (req, res) => {
     res.send(JSON.stringify(issuerProfile));
+});
+
+app.post('/issuer-profile', (req, res) => {
+    var data = req.body;
+    fs.writeFile('./student/test.txt', JSON.stringify(data), err => {
+        if (err) throw err;
+        // res.send(JSON.stringify(data));
+    })
 });
 
 app.get('/revocation-list', (req, res) => {
