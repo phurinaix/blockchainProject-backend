@@ -7,7 +7,7 @@ class Recipient {
     }
     addRecipient(name, pubKey, identity) {
         const recipient = {name, pubKey: `ecdsa-koblitz-pubkey:${pubKey}`, identity};
-        this.recipients.append(recipient);
+        this.recipients.push(recipient);
     }
     getRecipients() {
         return this.recipients;

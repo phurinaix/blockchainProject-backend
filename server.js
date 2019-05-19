@@ -49,6 +49,7 @@ app.get('/issuer-profile', (req, res) => {
 app.post('/issuer-profile', (req, res) => {
     var data = req.body;
     student.addData(JSON.stringify(data));
+    res.send('success');
 });
 
 app.get('/revocation-list', (req, res) => {

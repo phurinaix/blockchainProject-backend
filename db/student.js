@@ -5,7 +5,8 @@ class Student {
         ]
     }
     addData(data) {
-        this.data.append(data);
+        this.data.push(data);
+        
     }
     getData() {
         return this.data;
