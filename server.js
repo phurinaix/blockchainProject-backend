@@ -5,14 +5,12 @@ const fs = require('fs');
 const SHA256 = require("crypto-js/sha256");
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
-const { Student } = require('./db/student.js');
 const port = process.env.PORT || 8000;
 const issuerProfile = require('./issuerProfile/issuerProfile.json');
 const revocationList = require('./issuerProfile/revocationList.json');
 const cert_default = require('./cert_data/cert_default.json');
 const issuer = new Issuer();
 const recipient = new Recipient();
-const student = new Student();
 let certCount = 1;
 
 app.set('view engine', 'hbs');
@@ -50,10 +48,6 @@ app.post('/intro', (req, res) => {
     } else {
         res.send('error');
     }
-});
-
-app.get('/user', (req, res) => {
-    res.send(JSON.stringify(student.getData()));
 });
 
 app.get('/issuer-profile', (req, res) => {
