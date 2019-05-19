@@ -41,13 +41,14 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    if (data.nonce && data.bitcoinAddress) {
-        student.addData(JSON.stringify(data));
-        recipient.addPubKey(data.nonce, data.bitcoinAddress);
-        res.send('success');
-    } else {
-        res.send('error');
-    }
+    res.send('success');
+    // if (data.nonce && data.bitcoinAddress) {
+    //     student.addData(JSON.stringify(data));
+    //     recipient.addPubKey(data.nonce, data.bitcoinAddress);
+    //     res.send('success');
+    // } else {
+    //     res.send('error');
+    // }
 });
 
 app.get('/issuer-profile', (req, res) => {
