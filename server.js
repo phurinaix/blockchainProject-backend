@@ -39,7 +39,7 @@ app.post('/intro', (req, res) => {
 });
 
 app.get('/user', (req, res) => {
-    res.sendFile(JSON.stringify(student.getData()));
+    res.send(JSON.stringify(student.getData()));
 });
 
 app.get('/issuer-profile', (req, res) => {
