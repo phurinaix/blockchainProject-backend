@@ -41,15 +41,16 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    return res.status(200).send('success');
-    // res.send('success');
-    // if (data.nonce && data.bitcoinAddress) {
-        // student.addData(JSON.stringify(data));
-        res.send('success');
-        recipient.addPubKey(data.nonce, data.bitcoinAddress);
-    // } else {
-    //     res.send('error');
-    // }
+    // return res.status(200).send('success');
+    if (data.nonce && data.bitcoinAddress) {
+        if (recipient.addPubKey(data.nonce, data.bitcoinAddress)) {
+            res.status(200).send('success');
+        } else {
+            res.status(403).send('failed');
+        }
+    } else {
+        res.status(403).send('failed');
+    }
 });
 
 app.get('/issuer-profile', (req, res) => {
