@@ -41,11 +41,11 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    res.send('success');
+    // res.send('success');
     // if (data.nonce && data.bitcoinAddress) {
-    //     student.addData(JSON.stringify(data));
-    //     recipient.addPubKey(data.nonce, data.bitcoinAddress);
-    //     res.send('success');
+        // student.addData(JSON.stringify(data));
+        recipient.addPubKey(data.nonce, data.bitcoinAddress);
+        res.send('success');
     // } else {
     //     res.send('error');
     // }
