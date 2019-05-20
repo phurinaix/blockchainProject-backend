@@ -136,6 +136,23 @@ app.post('/diploma_template', (req, res) => {
     }
 });
 
+app.delete('/diploma_template/:cert_name', (req, res) => {
+    var certName = req.params.cert_name;
+    if (certName) {
+        try {
+            fs.unlink(`${__dirname}/cert_data/cert_template/${certName}.json`, err => {
+                if (err) throw err;
+                res.send('success');
+            });
+        }
+        catch (err) {
+            res.send('fail');
+        }
+    } else {
+        res.send('fail');
+    }
+});
+
 app.get('/recipients', (req, res) => {
     res.send(recipient.getRecipients());
 });
