@@ -44,17 +44,14 @@ app.get('/intro', (req, res) => {
 
 app.post('/intro', (req, res) => {
     var data = req.body;
-    // return res.status(200).send('success');
     if (data.nonce && data.bitcoinAddress) {
         db.query("SELECT * FROM recipient", (err, result) => {
             if (err)  {
                 throw err;
             } else {
-                var recipients = JSON.stringify(result);
-                var index = recipients.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
+                var index = result.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
                 if (index !== -1) {
-                    var identity = recipients[index].identity;
-                    // recipients[index].pubKey = `ecdsa-koblitz-pubkey:${pubKey}`;
+                    var identity = result[index].identity;
                     var sql = `UPDATE recipient SET pubKey = '${data.bitcoinAddress}' WHERE identity = '${identity}'`;
                     db.query(sql, (err, result) => {
                         if (err) throw err;
@@ -175,7 +172,7 @@ app.get('/recipients', (req, res) => {
 app.post('/recipient', (req, res) => {
     var data = req.body;
     if (data.name && data.id) {
-        if (!(/^[A-Za-z]+$/.test(data.name))) {
+        if (!(/^[A-Za-z]+$/.test(data.name.replace(/ /g,'')))) {
             return res.send('invalid_name');
         }
         if (!(/^\d+$/.test(data.id))) {
@@ -184,17 +181,32 @@ app.post('/recipient', (req, res) => {
         if (data.id.length !== 10) {
             return res.send('id_length');
         }
-        // recipient.addRecipient(data.name, '', data.id);
-        var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
-        db.query(sql, function (err, result) {
-            if (err) throw err;
-            var responseData = {
-                status: 'success',
-                oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+        db.query(`SELECT * FROM recipient WHERE identity = '${data.id}'`, (err, result) => {
+            if (err) {
+                throw err;
+            } else {
+                if (result.length > 0) {
+                    if (result.name !== data.name) {
+                        return res.send('invalid_name_id');
+                    }
+                    var responseData = {
+                        status: 'success',
+                        oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+                    }
+                    return res.send(JSON.stringify(responseData));
+                } else {
+                    var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
+                    db.query(sql, function (err, result) {
+                        if (err) throw err;
+                        var responseData = {
+                            status: 'success',
+                            oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+                        }
+                        return res.send(JSON.stringify(responseData));
+                    });
+                }
             }
-            return res.send(JSON.stringify(responseData));
         });
-        
     } else {
         res.send('not_complete');
     }
