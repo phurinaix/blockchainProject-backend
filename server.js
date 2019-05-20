@@ -100,7 +100,7 @@ app.get('/diploma_template/:cert_name', (req, res) => {
 });
 
 app.get('/diploma_template', (req, res) => {
-    fs.readdir('./cert_data/cert_template', function (err, files) {
+    fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
         res.send(JSON.stringify(files));
     });
 });
