@@ -103,18 +103,23 @@ app.get('/diploma_template/:cert_name', (req, res) => {
 var getDirectories = function (src, callback) {
     glob(__dirname + '/' + src + '/**/*', callback);
 };
+var sum = function (x, y) { 
+    return x + y;
+}
 app.get('/diploma_template', (req, res) => {
     // fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
     //     if (err) throw err;
     //     res.send(JSON.stringify(files));
     // });
-    getDirectories('cert_data/cert_template', function (err, res) {
-        if (err) {
-            throw err;
-        } else {
-            res.send(JSON.stringify(res));
-        }
-    });
+    // getDirectories('cert_data/cert_template', function (err, res) {
+    //     if (err) {
+    //         throw err;
+    //     } else {
+    //         res.send(JSON.stringify(res));
+    //     }
+    // });
+    var a = sum(10, 2);
+    res.send(a);
 });
 
 // fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
