@@ -186,14 +186,15 @@ app.post('/recipient', (req, res) => {
                 throw err;
             } else {
                 if (result.length > 0) {
-                    if (result.name !== data.name) {
+                    if (result[0].name !== data.name) {
                         return res.send('invalid_name_id');
+                    } else {
+                        var responseData = {
+                            status: 'success',
+                            oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+                        }
+                        return res.send(JSON.stringify(responseData));
                     }
-                    var responseData = {
-                        status: 'success',
-                        oneTimeCode: SHA256(data.id).toString().substring(10, 20)
-                    }
-                    return res.send(JSON.stringify(responseData));
                 } else {
                     var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
                     db.query(sql, function (err, result) {
