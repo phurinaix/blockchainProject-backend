@@ -91,12 +91,8 @@ app.post('/issuer/information', (req, res) => {
     }
 });
 
-// app.get("/issuer/logo", (req, res) => {
-//     res.sendFile(path.join(__dirname, `./uploads/${req.params.img}.png`));
-// });
-
 app.get('/diploma_template/:cert_name', (req, res) => {
-    var file = __dirname + `/cert_template/${req.params.cert_name}.json`;
+    var file = `${__dirname}/cert_data/cert_template/${req.params.cert_name}.json`;
     res.download(file);
 });
 
