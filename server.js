@@ -52,7 +52,7 @@ app.post('/intro', (req, res) => {
                 var index = result.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
                 if (index !== -1) {
                     var identity = result[index].identity;
-                    var sql = `UPDATE recipient SET pubKey = '${data.bitcoinAddress}' WHERE identity = '${identity}'`;
+                    var sql = `UPDATE recipient SET pubKey = 'ecdsa-koblitz-pubkey:${data.bitcoinAddress}' WHERE identity = '${identity}'`;
                     db.query(sql, (err, result) => {
                         if (err) throw err;
                         return res.status(200).send('success');
@@ -181,37 +181,69 @@ app.post('/recipient', (req, res) => {
         if (data.id.length !== 10) {
             return res.send('id_length');
         }
-        db.query(`SELECT * FROM recipient WHERE identity = '${data.id}'`, (err, result) => {
+        db.query(`SELECT * FROM recipient WHERE name = '${con.escape(data.name)}' AND identity = '${con.escape(data.id)}'`, (err, result) => {
             if (err) {
                 throw err;
             } else {
-                if (result.length > 0) {
-                    if (result[0].name !== data.name) {
-                        return res.send('invalid_name_id');
-                    } else {
-                        var responseData = {
-                            status: 'success',
-                            oneTimeCode: SHA256(data.id).toString().substring(10, 20)
-                        }
-                        return res.send(JSON.stringify(responseData));
-                    }
+                if (result.length === 0) {
+                    return res.send('invalid_name_id');
                 } else {
-                    var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
-                    db.query(sql, function (err, result) {
-                        if (err) throw err;
-                        var responseData = {
-                            status: 'success',
-                            oneTimeCode: SHA256(data.id).toString().substring(10, 20)
-                        }
-                        return res.send(JSON.stringify(responseData));
-                    });
+                    var responseData = {
+                        status: 'success',
+                        oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+                    }
+                    return res.send(JSON.stringify(responseData));
                 }
             }
         });
+
     } else {
         res.send('not_complete');
     }
 });
+// app.post('/recipient', (req, res) => {
+//     var data = req.body;
+//     if (data.name && data.id) {
+//         if (!(/^[A-Za-z]+$/.test(data.name.replace(/ /g,'')))) {
+//             return res.send('invalid_name');
+//         }
+//         if (!(/^\d+$/.test(data.id))) {
+//             return res.send('invalid_id');
+//         }
+//         if (data.id.length !== 10) {
+//             return res.send('id_length');
+//         }
+//         db.query(`SELECT * FROM recipient WHERE identity = '${data.id}'`, (err, result) => {
+//             if (err) {
+//                 throw err;
+//             } else {
+//                 if (result.length > 0) {
+//                     if (result[0].name !== data.name) {
+//                         return res.send('invalid_name_id');
+//                     } else {
+//                         var responseData = {
+//                             status: 'success',
+//                             oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+//                         }
+//                         return res.send(JSON.stringify(responseData));
+//                     }
+//                 } else {
+//                     var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
+//                     db.query(sql, function (err, result) {
+//                         if (err) throw err;
+//                         var responseData = {
+//                             status: 'success',
+//                             oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+//                         }
+//                         return res.send(JSON.stringify(responseData));
+//                     });
+//                 }
+//             }
+//         });
+//     } else {
+//         res.send('not_complete');
+//     }
+// });
 
 app.post('/diploma/recipient', (req, res) => {
     var postData = req.body;
