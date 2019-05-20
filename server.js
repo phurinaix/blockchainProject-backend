@@ -109,11 +109,11 @@ app.get('/diploma_template', (req, res) => {
     var getDirectories = function (src, callback) {
         glob(__dirname + '/' + src + '/**/*', callback);
     };
-    getDirectories('cert_data/cert_template', function (err, res) {
+    getDirectories('cert_data/cert_template', function (err, resutl) {
         if (err) {
             throw err;
         } else {
-            res.send(JSON.stringify(res));
+            res.send(JSON.stringify(result));
         }
     });
     // var a = sum(10, 2);
