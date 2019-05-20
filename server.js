@@ -181,7 +181,7 @@ app.post('/recipient', (req, res) => {
         if (data.id.length !== 10) {
             return res.send('id_length');
         }
-        db.query(`SELECT * FROM recipient WHERE name = '${db.escape(data.name)}' AND identity = '${db.escape(data.id)}'`, (err, result) => {
+        db.query(`SELECT * FROM recipient WHERE name = '${data.name.toLowerCase()}' AND identity = '${data.id}'`, (err, result) => {
             if (err) {
                 throw err;
             } else {
