@@ -167,7 +167,7 @@ app.post('/recipient', (req, res) => {
             return res.send('id_length');
         }
         recipient.addRecipient(data.name, '', data.id);
-        var sql = `INSERT INTO recipient (name, identity) VALUES ('${data.name}', ${parseInt(data.id)})`;
+        var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
         db.query(sql, function (err, result) {
             if (err) throw err;
             console.log("1 record inserted");
