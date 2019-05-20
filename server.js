@@ -46,15 +46,20 @@ app.post('/intro', (req, res) => {
     var data = req.body;
     // return res.status(200).send('success');
     if (data.nonce && data.bitcoinAddress) {
-        db.query("SELECT * FROM recipient", function (err, result, fields) {
+        db.query("SELECT * FROM recipient", (err, result) => {
             if (err)  {
                 throw err;
             } else {
                 var recipients = JSON.stringify(result);
                 var index = recipients.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
                 if (index !== -1) {
-                    recipients[index].pubKey = `ecdsa-koblitz-pubkey:${pubKey}`;
-                    return res.status(200).send('success');
+                    var identity = recipients[index].identity;
+                    // recipients[index].pubKey = `ecdsa-koblitz-pubkey:${pubKey}`;
+                    var sql = `UPDATE recipient SET pubKey = '${data.bitcoinAddress}' WHERE identity = '${identity}'`;
+                    db.query(sql, (err, result) => {
+                        if (err) throw err;
+                        return res.status(200).send('success');
+                    });
                 } else {
                     return res.status(403).send('failed');
                 }
