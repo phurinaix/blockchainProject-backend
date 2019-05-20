@@ -118,10 +118,10 @@ app.post('/diploma_template', (req, res) => {
         // json.badge.criteria.narrative = data.criteria_narrative;
         // json.badge.signatureLines[0].image = data.signature_img;
 
-        // fs.writeFile(`./cert_data/cert_template/cert${certCount++}.json`, JSON.stringify(json), (err) => {
-        //     if (err) throw err;
-        //     res.send('success');
-        // });
+        fs.writeFile(`${__dirname}/cert_data/cert_template/cert${certCount++}.json`, 'Hello', (err) => {
+            if (err) throw err;
+            res.send('success');
+        });
         res.send('success');
     } else {
         res.send('not_complete');        
