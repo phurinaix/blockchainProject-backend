@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const fs = require('fs');
 const SHA256 = require("crypto-js/sha256");
+const glob = require("glob");
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
 const port = process.env.PORT || 8000;
@@ -99,13 +100,36 @@ app.get('/diploma_template/:cert_name', (req, res) => {
     res.download(file);
 });
 
+var getDirectories = function (src, callback) {
+    glob(__dirname + '/' + src + '/**/*', callback);
+};
 app.get('/diploma_template', (req, res) => {
-    fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
-        if (err) throw err;
-        res.send(JSON.stringify(files));
+    // fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
+    //     if (err) throw err;
+    //     res.send(JSON.stringify(files));
+    // });
+    getDirectories('cert_data/cert_template', function (err, res) {
+        if (err) {
+            throw err;
+        } else {
+            res.send(JSON.stringify(res));
+        }
     });
 });
 
+// fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
+//     if (err) throw err;
+//     console.log(JSON.stringify(files));
+// });
+
+
+// getDirectories('cert_data/cert_template', function (err, res) {
+//     if (err) {
+//         console.log('Error', err);
+//     } else {
+//         console.log(res);
+//     }
+// });
 app.post('/diploma_template', (req, res) => {
     var data = req.body;
     var json = cert_default;
