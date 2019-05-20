@@ -111,14 +111,14 @@ app.post('/diploma_template', (req, res) => {
 
     if (data.badge_id && data.cert_title && data.cert_description && data.cert_img && data.criteria_narrative && data.signature_img ) {
 
-        // json.badge.id = data.badge_id;
-        // json.badge.name = data.cert_title;
-        // json.badge.description = data.cert_description;
-        // json.badge.image = data.cert_img;
-        // json.badge.criteria.narrative = data.criteria_narrative;
-        // json.badge.signatureLines[0].image = data.signature_img;
+        json.badge.id = data.badge_id;
+        json.badge.name = data.cert_title;
+        json.badge.description = data.cert_description;
+        json.badge.image = data.cert_img;
+        json.badge.criteria.narrative = data.criteria_narrative;
+        json.badge.signatureLines[0].image = data.signature_img;
 
-        fs.writeFile(`${__dirname}/cert_data/cert_template/cert${certCount++}.json`, 'Hello', (err) => {
+        fs.writeFile(`${__dirname}/cert_data/cert_template/cert${certCount++}.json`, JSON.stringify(json), (err) => {
             if (err) throw err;
             res.send('success');
         });
