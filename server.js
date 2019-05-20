@@ -6,6 +6,7 @@ const SHA256 = require("crypto-js/sha256");
 const glob = require("glob");
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
+const { db } = require('./db/db.js');
 const port = process.env.PORT || 8000;
 const issuerProfile = require('./issuerProfile/issuerProfile.json');
 const revocationList = require('./issuerProfile/revocationList.json');
@@ -166,6 +167,11 @@ app.post('/recipient', (req, res) => {
             return res.send('id_length');
         }
         recipient.addRecipient(data.name, '', data.id);
+        var sql = `INSERT INTO recipient (name, identity) VALUES ('${data.name}', ${parseInt(data.id)})`;
+        db.query(sql, function (err, result) {
+            if (err) throw err;
+            console.log("1 record inserted");
+        });
         var responseData = {
             status: 'success',
             oneTimeCode: SHA256(data.id).toString().substring(10, 20)
