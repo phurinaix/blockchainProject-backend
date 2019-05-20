@@ -101,6 +101,7 @@ app.get('/diploma_template/:cert_name', (req, res) => {
 
 app.get('/diploma_template', (req, res) => {
     fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
+        if (err) throw err;
         res.send(JSON.stringify(files));
     });
 });
@@ -122,7 +123,6 @@ app.post('/diploma_template', (req, res) => {
             if (err) throw err;
             res.send('success');
         });
-        res.send('success');
     } else {
         res.send('not_complete');        
     }
