@@ -1,12 +1,12 @@
 class Issuer {
     constructor () {
         this.info = {
-            issuer_url: 'https://www.issuer.org',
-            issuer_email: 'issuer@gmail.com',
+            issuer_url: 'https://tu-issuer.herokuapp.com/',
+            issuer_email: 'peterparkersatom@gmail.com',
             issuer_name: 'Thammasat University',
-            issuer_id: 'sdfsdf',
-            issuer_pubKey: 'ecdsa-koblitz-pubkey:msBCHdwaQ7N2ypBYupkp6uNxtr9Pg76imj',
-            revocation_list: 'https://www.blockcerts.org/samples/2.0/revocation-list-testnet.json',
+            issuer_id: 'TU',
+            issuer_pubKey: 'ecdsa-koblitz-pubkey:16EzhjxfcdWbESkW5v2ZASiQ27HVABsnTY',
+            revocation_list: 'https://tu-issuer.herokuapp.com/revocation-list-testnet',
             issuer_logo: null
         }
     }
