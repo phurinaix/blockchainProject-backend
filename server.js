@@ -118,8 +118,9 @@ app.get('/diploma_template', (req, res) => {
     //         res.send(JSON.stringify(res));
     //     }
     // });
-    var a = sum(10, 2);
-    res.send(a);
+    // var a = sum(10, 2);
+    // res.send(a);
+    res.send('diploma testing');
 });
 
 // fs.readdir(`${__dirname}/cert_data/cert_template`, function (err, files) {
