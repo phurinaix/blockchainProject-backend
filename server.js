@@ -109,7 +109,7 @@ app.get('/diploma_template', (req, res) => {
     var getDirectories = function (src, callback) {
         glob(__dirname + '/' + src + '/**/*', callback);
     };
-    getDirectories('cert_data/cert_template', function (err, resutl) {
+    getDirectories('cert_data/cert_template', function (err, result) {
         if (err) {
             throw err;
         } else {
