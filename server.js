@@ -71,6 +71,7 @@ app.get('/issuer-profile', (req, res) => {
     res.send(JSON.stringify(issuerProfile));
 });
 
+// revocation-list-testnet
 app.get('/revocation-list-testnet', (req, res) => {
     res.send(JSON.stringify(revocationList));
 });
