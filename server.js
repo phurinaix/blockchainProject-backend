@@ -72,7 +72,7 @@ app.get('/issuer-profile', (req, res) => {
 });
 
 //1DPnyQnNbaajjwT1mD363xNaEEwY8XTCTL
-app.get('/revocation-list', (req, res) => {
+app.get('/revocation-list-testnet', (req, res) => {
     res.send(JSON.stringify(revocationList));
 });
 
