@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require('fs');
 const SHA256 = require("crypto-js/sha256");
 const glob = require("glob");
+const UUID = require('uuid-js');
 const { Issuer } = require('./db/issuer.js');
 const { Recipient } = require('./db/recipient.js');
 const { db } = require('./db/db.js');
@@ -12,8 +13,8 @@ const issuerProfile = require('./issuerProfile/issuerProfile.json');
 const revocationList = require('./issuerProfile/revocationList.json');
 const cert_default = require('./cert_data/cert_default.json');
 const issuer = new Issuer();
-const recipient = new Recipient();
 let certCount = 1;
+var userLoginKey = [];
 
 app.set('view engine', 'hbs');
 app.use(express.static(__dirname + '/public'));
@@ -49,7 +50,8 @@ app.post('/intro', (req, res) => {
             if (err)  {
                 throw err;
             } else {
-                var index = result.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
+                // var index = result.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
+                var index = result.findIndex(recipient => recipient.identity == data.nonce);
                 if (index !== -1) {
                     var identity = result[index].identity;
                     var sql = `UPDATE recipient SET pubKey = 'ecdsa-koblitz-pubkey:${data.bitcoinAddress}' WHERE identity = '${identity}'`;
@@ -126,9 +128,9 @@ app.post('/diploma_template', (req, res) => {
     var data = req.body;
     var json = cert_default;
 
-    if (data.badge_id && data.cert_title && data.cert_description && data.cert_img && data.criteria_narrative && data.signature_img ) {
-
-        json.badge.id = data.badge_id;
+    if (data.cert_title && data.cert_description && data.cert_img && data.criteria_narrative && data.signature_img ) {
+        var badge_id = UUID.create();
+        json.badge.id = badge_id.toString();
         json.badge.name = data.cert_title;
         json.badge.description = data.cert_description;
         json.badge.image = data.cert_img;
@@ -161,8 +163,34 @@ app.delete('/diploma_template/:cert_name', (req, res) => {
     }
 });
 
+app.post('/recipient/email', (req, res) => {
+    var data = req.body;
+    if (data.email && data.identity) {
+        if (!(/^\d+$/.test(data.identity))) {
+            return res.send('fail');
+        }
+        if (data.identity.length !== 10) {
+            return res.send('fail');
+        }
+        db.query(`UPDATE recipient SET email = '${data.email}' WHERE identity='${data.identity}'`, (err, result) => {
+            if (err) throw err;
+            res.send('success');
+        });
+    } else {
+        res.send('fail');
+    }
+});
+
+app.get('/recipient/:id', (req, res) => {
+    var id = req.params.id;
+    var sql = `SELECT email FROM recipient WHERE identity='${id}'`;
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send(result[0].email);
+    });
+});
+
 app.get('/recipients', (req, res) => {
-    // res.send(recipient.getRecipients());
     db.query("SELECT * FROM recipient", function (err, result, fields) {
         if (err) throw err;
         res.send(JSON.stringify(result));
@@ -190,8 +218,9 @@ app.post('/recipient', (req, res) => {
                 } else {
                     var responseData = {
                         status: 'success',
-                        oneTimeCode: SHA256(data.id).toString().substring(10, 20)
+                        key0: UUID.create().toString()
                     }
+                    userLoginKey.push(responseData.key0);
                     return res.send(JSON.stringify(responseData));
                 }
             }
@@ -201,49 +230,23 @@ app.post('/recipient', (req, res) => {
         res.send('not_complete');
     }
 });
-// app.post('/recipient', (req, res) => {
-//     var data = req.body;
-//     if (data.name && data.id) {
-//         if (!(/^[A-Za-z]+$/.test(data.name.replace(/ /g,'')))) {
-//             return res.send('invalid_name');
-//         }
-//         if (!(/^\d+$/.test(data.id))) {
-//             return res.send('invalid_id');
-//         }
-//         if (data.id.length !== 10) {
-//             return res.send('id_length');
-//         }
-//         db.query(`SELECT * FROM recipient WHERE identity = '${data.id}'`, (err, result) => {
-//             if (err) {
-//                 throw err;
-//             } else {
-//                 if (result.length > 0) {
-//                     if (result[0].name !== data.name) {
-//                         return res.send('invalid_name_id');
-//                     } else {
-//                         var responseData = {
-//                             status: 'success',
-//                             oneTimeCode: SHA256(data.id).toString().substring(10, 20)
-//                         }
-//                         return res.send(JSON.stringify(responseData));
-//                     }
-//                 } else {
-//                     var sql = `INSERT INTO recipient (name, pubKey, identity) VALUES ('${data.name}', '', '${data.id}')`;
-//                     db.query(sql, function (err, result) {
-//                         if (err) throw err;
-//                         var responseData = {
-//                             status: 'success',
-//                             oneTimeCode: SHA256(data.id).toString().substring(10, 20)
-//                         }
-//                         return res.send(JSON.stringify(responseData));
-//                     });
-//                 }
-//             }
-//         });
-//     } else {
-//         res.send('not_complete');
-//     }
-// });
+
+app.post('/recipient/session', (req, res) => {
+    var data = req.body;
+    if (userLoginKey.includes(data.key)) {
+        return res.send('authorized');
+    }
+    res.send('unauthorized');
+});
+
+app.post('/recipient/logout', (req, res) => {
+    var data = req.body;
+    if (userLoginKey.includes(data.key)) {
+        userLoginKey = userLoginKey.filter(key => key !== data.key);
+        return res.send('success');
+    }
+    res.send('fail');
+});
 
 app.post('/diploma/recipient', (req, res) => {
     var postData = req.body;
