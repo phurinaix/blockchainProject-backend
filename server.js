@@ -73,11 +73,11 @@ app.get('/issuer-profile', (req, res) => {
     res.send(JSON.stringify(issuerProfile));
 });
 
-// revocation-list-testnet
 app.get('/revocation-list-testnet', (req, res) => {
     res.send(JSON.stringify(revocationList));
 });
 
+/** Create template website */
 app.get('/issuer/information', (req, res) => {
     res.send(issuer.getInfo());
 });
@@ -162,6 +162,27 @@ app.delete('/diploma_template/:cert_name', (req, res) => {
         res.send('fail');
     }
 });
+
+app.post('/diploma/recipient', (req, res) => {
+    var postData = req.body;
+    // console.log('okay!!');
+    fs.readFile(`./cert_data/cert_template/${postData.cert_name}.json`, 'utf8', (err, data) => {
+        if (err) throw err;
+        var jsonData = JSON.parse(data);
+        // console.log(JSON.stringify(postData));
+        postData.choose_recipients.forEach(recipient => {
+            jsonData.recipient.identity = recipient.identity;
+            jsonData.recipientProfile.name = recipient.name;
+            jsonData.recipientProfile.publicKey = recipient.pubKey;
+            fs.writeFile(`./cert_data/unsigned_certificates/${postData.cert_name}-${recipient.identity}.json`, JSON.stringify(jsonData), err => {
+                if (err) throw err;
+            });
+        });
+        res.send('success');
+    });
+});
+
+/** Student website **/
 
 app.post('/recipient/email', (req, res) => {
     var data = req.body;
@@ -248,24 +269,77 @@ app.post('/recipient/logout', (req, res) => {
     res.send('fail');
 });
 
-app.post('/diploma/recipient', (req, res) => {
-    var postData = req.body;
-    // console.log('okay!!');
-    fs.readFile(`./cert_data/cert_template/${postData.cert_name}.json`, 'utf8', (err, data) => {
+app.get('/recipient/credential/:identity', (req, res) => {
+    var student_id = req.params.identity;
+    if (!student_id) {
+        return res.send('empty_id');
+    }
+    if (!(/^\d+$/.test(student_id))) {
+        return res.send('invalid_id');
+    }
+    if (student_id.length !== 10) {
+        return res.send('id_length');
+    }
+    var sql = `SELECT * FROM credential WHERE student_id = '${student_id}'`;
+    db.query(sql, (err, result) => {
         if (err) throw err;
-        var jsonData = JSON.parse(data);
-        // console.log(JSON.stringify(postData));
-        postData.choose_recipients.forEach(recipient => {
-            jsonData.recipient.identity = recipient.identity;
-            jsonData.recipientProfile.name = recipient.name;
-            jsonData.recipientProfile.publicKey = recipient.pubKey;
-            fs.writeFile(`./cert_data/unsigned_certificates/${postData.cert_name}-${recipient.identity}.json`, JSON.stringify(jsonData), err => {
-                if (err) throw err;
-            });
-        });
-        res.send('success');
+        return res.send(JSON.stringify(result));
     });
 });
+
+app.post('/recipient/credential', (req, res) => {
+    var data = req.body;
+    if (typeof data.diploma === "boolean" && typeof data.transcript === "boolean") {
+        if (data.diploma === true || data.transcript === true) {
+            if (!data.id) {
+                return res.send('empty_id');
+            }
+            if (!(/^\d+$/.test(data.id))) {
+                return res.send('invalid_id');
+            }
+            if (data.id.length !== 10) {
+                return res.send('id_length');
+            }
+            var sql = `SELECT * FROM credential WHERE student_id = '${data.id}'`;
+            db.query(sql, (err, result) => {
+                if (err) {
+                    throw err;
+                } else {
+                    var numRows = result.length;
+                    if (numRows >= 5) {
+                        return res.send('limit');
+                    } else {
+                        var sql = `INSERT INTO credential (student_id, diploma, transcript) VALUES ('${data.id}', ${data.diploma}, ${data.transcript})`;
+                        db.query(sql, (err, result) => {
+                            if (err) throw err;
+                            return res.send('success');
+                        });
+                    }
+                }
+            });
+            
+        } else {
+            return res.send('empty_credential');
+        }
+    } else {
+        res.send('invalid_type');
+    }
+});
+
+app.delete('/recipient/credential/:id', (req, res) => {
+    var id = req.params.id;
+    if (!isNaN(id)) {
+        var sql = `DELETE FROM credential WHERE id = ${id}`;
+        db.query(sql, (err, result) => {
+            if (err) throw err;
+            res.send('success');
+        });
+    } else {
+        res.send('invalid_id');
+    }
+});
+
+/** End of Student website **/
 
 app.listen(port, () => {
     console.log(`server starting on port ${port}`);
