@@ -6,7 +6,6 @@ const SHA256 = require("crypto-js/sha256");
 const glob = require("glob");
 const UUID = require('uuid-js');
 const { Issuer } = require('./db/issuer.js');
-const { Recipient } = require('./db/recipient.js');
 const { db } = require('./db/db.js');
 const port = process.env.PORT || 8000;
 const issuerProfile = require('./issuerProfile/issuerProfile.json');
@@ -85,6 +84,7 @@ app.get('/issuer/information', (req, res) => {
 app.post('/issuer/information', (req, res) => {
     var data = req.body;
     var json = cert_default;
+    var jsonIssuerProfile = issuerProfile;
 
     if (data.issuer_url && data.issuer_email && data.issuer_name && data.issuer_id && data.issuer_pubKey && data.revocation_list && data.issuer_logo) {
         issuer.updateAll(data.issuer_url, data.issuer_email, data.issuer_name, data.issuer_id, data.issuer_pubKey, data.revocation_list, data.issuer_logo);
@@ -96,9 +96,22 @@ app.post('/issuer/information', (req, res) => {
         json.verification.publicKey = data.issuer_pubKey;
         json.badge.issuer.image = data.issuer_logo;
 
-        fs.writeFile('./cert_data/cert_default.json', JSON.stringify(json), (err) => {
-            if (err) throw err;
-            res.send('success');
+        jsonIssuerProfile.id = data.issuer_id;
+        jsonIssuerProfile.name = data.issuer_name;
+        jsonIssuerProfile.url = data.issuer_url;
+        jsonIssuerProfile.email = data.issuer_email;
+        jsonIssuerProfile.revocationList = data.revocation_list;
+        jsonIssuerProfile.publicKey[0].id = data.issuer_pubkey;
+
+        fs.writeFile(`${__dirname}/cert_data/cert_default.json`, JSON.stringify(json), (err) => {
+            if (err) {
+                throw err;
+            } else {
+                fs.writeFile(`${__dirname}/issuerProfile/issuerProfile.json`, JSON.stringify(jsonIssuerProfile), (err) => {
+                    if (err) throw err;
+                    res.send('success');
+                });
+            }
         });
     } else {
         res.send('not_complete');
@@ -107,6 +120,14 @@ app.post('/issuer/information', (req, res) => {
 
 app.get('/diploma_template/:cert_name', (req, res) => {
     var file = `${__dirname}/cert_data/cert_template/${req.params.cert_name}.json`;
+    // var folderPath = `${__dirname}/cert_data/unsigned_certificates`;
+
+    // child_process.execSync(`zip -r archive *`, {
+    //     cwd: folderPath
+    // });
+
+  // zip archive of your folder is ready to download
+    // res.download(folderpath + '/archive.zip');
     res.download(file);
 });
 
@@ -130,7 +151,7 @@ app.post('/diploma_template', (req, res) => {
 
     if (data.cert_title && data.cert_description && data.cert_img && data.criteria_narrative && data.signature_img ) {
         var badge_id = UUID.create();
-        json.badge.id = badge_id.toString();
+        json.badge.id = `urn:uuid:${badge_id.toString()}`;
         json.badge.name = data.cert_title;
         json.badge.description = data.cert_description;
         json.badge.image = data.cert_img;
@@ -173,21 +194,33 @@ app.get('/diploma/recipient', (req, res) => {
     });
 });
 
+// issue unsigned cert
 app.post('/diploma/recipient', (req, res) => {
     var postData = req.body;
-    fs.readFile(`./cert_data/cert_template/${postData.cert_name}.json`, 'utf8', (err, data) => {
-        if (err) throw err;
-        var jsonData = JSON.parse(data);
-        postData.choose_recipients.forEach(recipient => {
-            jsonData.recipient.identity = recipient.identity;
-            jsonData.recipientProfile.name = recipient.name;
-            jsonData.recipientProfile.publicKey = recipient.pubKey;
-            fs.writeFile(`./cert_data/unsigned_certificates/${postData.cert_name}-${recipient.identity}.json`, JSON.stringify(jsonData), err => {
+    if (postData.cert_name && postData.choose_recipients) {
+        if (postData.choose_recipients.length > 0) {
+            fs.readFile(`./cert_data/cert_template/${postData.cert_name}.json`, 'utf8', (err, data) => {
                 if (err) throw err;
+                var jsonData = JSON.parse(data);
+                postData.choose_recipients.forEach(recipient => {
+                    var file = `${__dirname}/cert_data/unsigned_certificates/${postData.cert_name}-${recipient.identity}.json`;
+                    var cert_id = UUID.create();
+                    jsonData.id = `urn:uuid:${cert_id.toString()}`;
+                    jsonData.recipient.identity = recipient.email;
+                    jsonData.recipientProfile.name = recipient.name;
+                    jsonData.recipientProfile.publicKey = recipient.pubKey;
+                    fs.writeFile(file, JSON.stringify(jsonData), err => {
+                        if (err) throw err;
+                    });
+                });
+                res.send('success');
             });
-        });
-        res.send('success');
-    });
+        } else {
+            res.send('fail');
+        }
+    } else {
+        res.send('fail');
+    }
 });
 
 /** Student website **/
