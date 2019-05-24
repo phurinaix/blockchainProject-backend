@@ -163,13 +163,21 @@ app.delete('/diploma_template/:cert_name', (req, res) => {
     }
 });
 
+app.get('/diploma/recipient', (req, res) => {
+    var sql = `SELECT DISTINCT recipient.name, recipient.pubKey, recipient.identity, recipient.email
+    FROM recipient
+    INNER JOIN credential ON recipient.identity=credential.student_id WHERE credential.diploma=true`;
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send(JSON.stringify(result));
+    });
+});
+
 app.post('/diploma/recipient', (req, res) => {
     var postData = req.body;
-    // console.log('okay!!');
     fs.readFile(`./cert_data/cert_template/${postData.cert_name}.json`, 'utf8', (err, data) => {
         if (err) throw err;
         var jsonData = JSON.parse(data);
-        // console.log(JSON.stringify(postData));
         postData.choose_recipients.forEach(recipient => {
             jsonData.recipient.identity = recipient.identity;
             jsonData.recipientProfile.name = recipient.name;
