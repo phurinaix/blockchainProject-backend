@@ -354,6 +354,8 @@ app.post('/recipient/credential', (req, res) => {
                         for(let i = 0; i < credentialResult.length; i++) {
                             if (credentialResult[i].credential_type === "diploma") {
                                 return res.end('already_diploma');
+                            } else if (credentialResult[i].credential_type === "diploma,transcript") {
+                                return res.end('already_both');
                             }
                         }
                         var insertSql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'diploma')`;
@@ -361,6 +363,8 @@ app.post('/recipient/credential', (req, res) => {
                         for(let i = 0; i < credentialResult.length; i++) {
                             if (credentialResult[i].credential_type === "transcript") {
                                 return res.end('already_transcript');
+                            } else if (credentialResult[i].credential_type === "diploma,transcript") {
+                                return res.end('already_both');
                             }
                         }
                         var insertSql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'transcript')`;
