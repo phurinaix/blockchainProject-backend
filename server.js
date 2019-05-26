@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const fs = require('fs');
 const SHA256 = require("crypto-js/sha256");
+const { decryptNumber } = require("./utils/decrypt.js");
 const glob = require("glob");
 const UUID = require('uuid-js');
 const { Issuer } = require('./db/issuer.js');
@@ -50,7 +51,7 @@ app.post('/intro', (req, res) => {
                 throw err;
             } else {
                 // var index = result.findIndex(recipient => SHA256(recipient.identity).toString().substring(10, 20) == data.nonce);
-                var index = result.findIndex(recipient => recipient.identity == data.nonce);
+                var index = result.findIndex(recipient => recipient.identity == decryptNumber(data.nonce));
                 if (index !== -1) {
                     var identity = result[index].identity;
                     var sql = `UPDATE recipient SET pubKey = 'ecdsa-koblitz-pubkey:${data.bitcoinAddress}' WHERE identity = '${identity}'`;
