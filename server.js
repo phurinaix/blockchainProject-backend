@@ -363,8 +363,11 @@ app.post('/recipient/credential', (req, res) => {
                         var sql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'transcript')`;
                     } else if (data.diploma === true && data.transcript === true) {
                         result.forEach(r => {
-                            if (r.credential_type === "diploma,transcript") {
-                                return res.send('already_both');
+                            if (r.credential_type === "diploma") {
+                                return res.send('already_diploma');
+                            }
+                            if (r.credential_type === "transcript") {
+                                return res.send('already_transcript');
                             }
                         });
                         var sql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'diploma,transcript')`;
