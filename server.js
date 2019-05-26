@@ -342,21 +342,37 @@ app.post('/recipient/credential', (req, res) => {
             if (data.id.length !== 10) {
                 return res.send('id_length');
             }
-            var sql = `SELECT * FROM credential WHERE student_id = '${data.id}'`;
+            var sql = `SELECT * FROM credential_type WHERE student_id = '${data.id}'`;
             db.query(sql, (err, result) => {
                 if (err) {
                     throw err;
                 } else {
-                    var numRows = result.length;
-                    if (numRows >= 5) {
-                        return res.send('limit');
-                    } else {
-                        var sql = `INSERT INTO credential (student_id, diploma, transcript) VALUES ('${data.id}', ${data.diploma}, ${data.transcript})`;
-                        db.query(sql, (err, result) => {
-                            if (err) throw err;
-                            return res.send('success');
+                    if (data.diploma === true && data.transcript === false) {
+                        result.forEach(r => {
+                            if (r.credential_type === "diploma") {
+                                return res.send('already_diploma');
+                            }
                         });
+                        var sql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'diploma')`;
+                    } else if (data.diploma === false && data.transcript === true) {
+                        result.forEach(r => {
+                            if (r.credential_type === "transcript") {
+                                return res.send('already_transcript');
+                            }
+                        });
+                        var sql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'transcript')`;
+                    } else if (data.diploma === true && data.transcript === true) {
+                        result.forEach(r => {
+                            if (r.credential_type === "diploma,transcript") {
+                                return res.send('already_both');
+                            }
+                        });
+                        var sql = `INSERT INTO credential (student_id, credential_type) VALUES ('${data.id}', 'diploma,transcript')`;
                     }
+                    db.query(sql, (err, result) => {
+                        if (err) throw err;
+                        return res.send('success');
+                    });
                 }
             });
             
