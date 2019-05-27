@@ -188,7 +188,7 @@ app.delete('/diploma_template/:cert_name', (req, res) => {
 app.get('/diploma/recipient', (req, res) => {
     var sql = `SELECT DISTINCT recipient.name, recipient.pubKey, recipient.identity, recipient.email
     FROM recipient
-    INNER JOIN credential ON recipient.identity=credential.student_id WHERE credential.diploma=true`;
+    INNER JOIN credential ON recipient.identity=credential.student_id WHERE credential.credential_type='diploma' OR credential.credential_type='diploma,transcript'`;
     db.query(sql, (err, result) => {
         if (err) throw err;
         res.send(JSON.stringify(result));
