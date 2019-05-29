@@ -121,14 +121,6 @@ app.post('/issuer/information', (req, res) => {
 
 app.get('/diploma_template/:cert_name', (req, res) => {
     var file = `${__dirname}/cert_data/cert_template/${req.params.cert_name}.json`;
-    // var folderPath = `${__dirname}/cert_data/unsigned_certificates`;
-
-    // child_process.execSync(`zip -r archive *`, {
-    //     cwd: folderPath
-    // });
-
-  // zip archive of your folder is ready to download
-    // res.download(folderpath + '/archive.zip');
     res.download(file);
 });
 
@@ -144,6 +136,41 @@ app.get('/diploma_template', (req, res) => {
             res.send(JSON.stringify(result));
         }
     });
+});
+
+app.get('/unsigned/:name', (req, res) => {
+    var file = `${__dirname}/cert_data/unsigned_certificates/${req.params.name}.json`;
+    res.download(file);
+});
+
+app.get('/unsigned', (req, res) => {
+    var getDirectories = function (src, callback) {
+        glob(__dirname + '/' + src + '/**/*', callback);
+    };
+    getDirectories('cert_data/unsigned_certificates', function (err, result) {
+        if (err) {
+            throw err;
+        } else {
+            res.send(JSON.stringify(result));
+        }
+    });
+});
+
+app.delete('/unsigned/:name', (req, res) => {
+    var name = req.params.name;
+    if (name) {
+        try {
+            fs.unlink(`${__dirname}/cert_data/unsigned_certificates/${name}.json`, err => {
+                if (err) throw err;
+                res.send('success');
+            });
+        }
+        catch (err) {
+            res.send('fail');
+        }
+    } else {
+        res.send('fail');
+    }
 });
 
 app.post('/diploma_template', (req, res) => {
