@@ -12,6 +12,7 @@ const port = process.env.PORT || 8000;
 const issuerProfile = require('./issuerProfile/issuerProfile.json');
 const revocationList = require('./issuerProfile/revocationList.json');
 const cert_default = require('./cert_data/cert_default.json');
+const transcript_default = require('./transcript_data/transcript_default.json');
 const issuer = new Issuer();
 let certCount = 1;
 var userLoginKey = [];
@@ -177,13 +178,13 @@ app.post('/diploma_template', (req, res) => {
     var data = req.body;
     var json = cert_default;
 
-    if (data.cert_title && data.cert_description && data.cert_img && data.criteria_narrative && data.signature_img ) {
+    if (data.cert_title && data.cert_description && data.cert_img && data.signature_img ) {
         var badge_id = UUID.create();
         json.badge.id = `urn:uuid:${badge_id.toString()}`;
         json.badge.name = data.cert_title;
         json.badge.description = data.cert_description;
         json.badge.image = data.cert_img;
-        json.badge.criteria.narrative = data.criteria_narrative;
+        // json.badge.criteria.narrative = data.criteria_narrative;
         json.badge.signatureLines[0].image = data.signature_img;
 
         fs.writeFile(`${__dirname}/cert_data/cert_template/cert${certCount++}.json`, JSON.stringify(json), (err) => {
@@ -210,6 +211,31 @@ app.delete('/diploma_template/:cert_name', (req, res) => {
     } else {
         res.send('fail');
     }
+});
+
+app.post('/transcript', (req, res) => {
+    var data = req.body;
+    // console.log(data.student);
+    var transcriptJson = transcript_default;
+    var badge_id = UUID.create();
+    transcriptJson.badge.id = `urn:uuid:${badge_id.toString()}`;
+    transcriptJson.badge.transcript = data.data;
+    var transcript_id = UUID.create();
+    transcriptJson.id = `urn:uuid:${transcript_id.toString()}`;
+    transcriptJson.recipient.identity = data.student[0].email;
+    transcriptJson.recipientProfile.name = data.student[0].name;
+    transcriptJson.recipientProfile.publicKey = data.student[0].pubKey;
+    
+    fs.writeFile(`${__dirname}/transcript_data/transcript-${data.student[0].identity}.json`, JSON.stringify(transcriptJson), (err) => {
+        if (err) throw err;
+        res.send('success');
+    });
+    // console.log(data);
+});
+
+app.get('/transcript/:identity', (req, res) => {
+    var file = `${__dirname}/transcript_data/transcript-${req.params.identity}.json`;
+    res.download(file);
 });
 
 app.get('/diploma/recipient', (req, res) => {
