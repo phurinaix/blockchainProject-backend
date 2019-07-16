@@ -4,5 +4,10 @@
     "id": "https://tu-issuer.herokuapp.com/revocation-list-testnet",
     "type": "RevocationList",
     "issuer": "https://tu-issuer.herokuapp.com/issuer-profile",
-    "revokedAssertions": []
+    "revokedAssertions": [
+        {
+            "id": "urn:uuid:f188077e-b517-45d5-92a1-c315915a266a",
+            "revocationReason": "Expired"
+        }
+    ]
 }
